@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Zdroje · Catering{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Zdroje</h1>
+    <div class="subtle">Týmy, auta, kuchyně… včetně barev pro kalendář.</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('resource_new') }}">+ Přidat zdroj</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Název</th>
+            <th>Typ</th>
+            <th>Barva</th>
+            <th>Stav</th>
+            <th class="text-end">Akce</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in resources %}
+          <tr>
+            <td class="fw-semibold">{{ r.name }}</td>
+            <td class="text-secondary">{{ r.kind }}</td>
+            <td>
+              <span class="d-inline-block rounded-circle border me-2" style="width:14px;height:14px;background:{{ r.color }};"></span>
+              <span class="text-secondary">{{ r.color }}</span>
+            </td>
+            <td>
+              {% if r.is_active %}
+                <span class="badge text-bg-success">aktivní</span>
+              {% else %}
+                <span class="badge text-bg-secondary">neaktivní</span>
+              {% endif %}
+            </td>
+            <td class="text-end d-flex justify-content-end gap-2">
+              <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('resource_edit', rid=r.id) }}">Upravit</a>
+              <form method="post" action="{{ url_for('resource_toggle', rid=r.id) }}" class="m-0">
+                <button class="btn btn-outline-secondary btn-sm" type="submit">
+                  {% if r.is_active %}Vypnout{% else %}Zapnout{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if resources|length == 0 %}
+          <tr><td colspan="5" class="text-center text-secondary py-4">Zatím žádné zdroje.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

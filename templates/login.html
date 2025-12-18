@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Přihlášení · Catering{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <h1 class="h4 page-title mb-1">Přihlášení</h1>
+        <div class="subtle mb-3">Přístup do systému rezervací.</div>
+
+        <form method="post" action="{{ url_for('login_post') }}" class="vstack gap-2">
+          <div>
+            <label class="form-label small subtle">Uživatelské jméno</label>
+            <input class="form-control" name="username" required autocomplete="username">
+          </div>
+          <div>
+            <label class="form-label small subtle">Heslo</label>
+            <input class="form-control" name="password" type="password" required autocomplete="current-password">
+          </div>
+
+          <button class="btn btn-primary w-100 mt-2" type="submit">Přihlásit</button>
+        </form>
+
+        <div class="text-center subtle small mt-3">
+          Nemáš účet? <a href="{{ url_for('register') }}">Registrovat</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

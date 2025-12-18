@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Brigádníci · Catering{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Brigádníci – přehled</h1>
+    <div class="subtle">Akce v budoucnu a kdo je přihlášen.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    {% for r in items %}
+      <div class="p-3 rounded-4 border mb-3">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="d-inline-block rounded-circle border" style="width:12px;height:12px;background:{{ r.resource.color }};"></span>
+          <div class="fw-semibold">{{ r.title }}</div>
+          <div class="text-secondary small ms-auto">{{ r.start.strftime('%Y-%m-%d %H:%M') }} – {{ r.end.strftime('%H:%M') }}</div>
+        </div>
+        <div class="text-secondary small">{{ r.resource.name }} · {{ r.location or '—' }}</div>
+
+        <div class="mt-2">
+          {% if r.signups|length == 0 %}
+            <div class="text-secondary">Nikdo přihlášen.</div>
+          {% else %}
+            <ul class="mb-0">
+              {% for s in r.signups %}
+                <li>{{ s.user.username }} ({{ s.user.email or '—' }})</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+
+        <div class="mt-2">
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('detail', rid=r.id) }}">Detail</a>
+        </div>
+      </div>
+    {% endfor %}
+    {% if items|length == 0 %}
+      <div class="text-secondary">Žádné budoucí akce.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

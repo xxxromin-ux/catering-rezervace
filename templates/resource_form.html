@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% if mode=='new' %}Nový zdroj{% else %}Upravit zdroj{% endif %} · Catering{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">
+      {% if mode=='new' %}Nový zdroj{% else %}Upravit zdroj{% endif %}
+    </h1>
+    <div class="subtle">Název, typ, aktivita a barva v kalendáři.</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('resources_list') }}">Zpět</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-3 p-lg-4">
+    <form method="post" class="row g-3">
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Název *</label>
+        <input class="form-control" name="name" required value="{{ r.name if r else '' }}">
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Typ</label>
+        <select class="form-select" name="kind">
+          {% set k = (r.kind if r else 'team') %}
+          <option value="team" {% if k=='team' %}selected{% endif %}>team</option>
+          <option value="vehicle" {% if k=='vehicle' %}selected{% endif %}>vehicle</option>
+          <option value="kitchen" {% if k=='kitchen' %}selected{% endif %}>kitchen</option>
+          <option value="other" {% if k=='other' %}selected{% endif %}>other</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Barva</label>
+        <input class="form-control form-control-color" name="color" type="color"
+               value="{{ r.color if r else '#0b57d0' }}" style="height:44px">
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_active" id="active"
+                 {% if r is none or r.is_active %}checked{% endif %}>
+          <label class="form-check-label" for="active">Aktivní</label>
+        </div>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Uložit</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('resources_list') }}">Zpět</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

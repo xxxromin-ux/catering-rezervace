@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Registrace · Catering{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <h1 class="h4 page-title mb-1">Registrace</h1>
+        <div class="subtle mb-3">První účet v databázi bude admin.</div>
+
+        <form method="post" action="{{ url_for('register') }}" class="vstack gap-2">
+          <div>
+            <label class="form-label small subtle">Uživatelské jméno</label>
+            <input class="form-control" name="username" required autocomplete="username">
+          </div>
+          <div>
+            <label class="form-label small subtle">Email (pro notifikace)</label>
+            <input class="form-control" name="email" type="email" autocomplete="email" placeholder="např. brigadnik@email.cz">
+          </div>
+          <div>
+            <label class="form-label small subtle">Heslo</label>
+            <input class="form-control" name="password" type="password" required autocomplete="new-password">
+          </div>
+          <div>
+            <label class="form-label small subtle">Heslo znovu</label>
+            <input class="form-control" name="password2" type="password" required autocomplete="new-password">
+          </div>
+
+          <button class="btn btn-primary w-100 mt-2" type="submit">Vytvořit účet</button>
+        </form>
+
+        <div class="text-center subtle small mt-3">
+          Už máš účet? <a href="{{ url_for('login') }}">Přihlásit</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

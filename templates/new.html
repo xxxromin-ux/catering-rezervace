@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Nová rezervace · Catering{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Nová rezervace</h1>
+    <div class="subtle">Rezervaci vytváří admin. Kontrolují se kolize.</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('calendar_view') }}">Zpět</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-3 p-lg-4">
+    <form method="post" action="{{ url_for('new_reservation') }}" class="row g-3">
+      <div class="col-12">
+        <label class="form-label small subtle">Název akce *</label>
+        <input class="form-control" name="title" required placeholder="Např. firemní večírek / svatba / konference">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Zdroj *</label>
+        <select class="form-select" name="resource_id" required>
+          <option value="" selected disabled>Vyber…</option>
+          {% for r in resources %}
+            <option value="{{ r.id }}">{{ r.name }} ({{ r.kind }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Začátek *</label>
+        <input class="form-control" name="start" required type="datetime-local">
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Konec *</label>
+        <input class="form-control" name="end" required type="datetime-local">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Zákazník</label>
+        <input class="form-control" name="client" placeholder="Firma / jméno">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Kontakt</label>
+        <input class="form-control" name="contact" placeholder="telefon / email">
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <label class="form-label small subtle">Místo akce</label>
+        <input class="form-control" name="location" placeholder="Adresa / venue">
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <label class="form-label small subtle">Hosté</label>
+        <input class="form-control" name="guests" type="number" min="0" step="1" placeholder="0">
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <label class="form-label small subtle">Stav</label>
+        <select class="form-select" name="status">
+          <option value="confirmed" selected>confirmed</option>
+          <option value="tentative">tentative</option>
+          <option value="cancelled">cancelled</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label small subtle">Poznámka</label>
+        <textarea class="form-control" name="note" rows="4" placeholder="Poznámky k akci…"></textarea>
+      </div>
+
+      <div class="col-12 d-flex flex-wrap gap-2 mt-1">
+        <button class="btn btn-primary" type="submit">Uložit rezervaci</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('calendar_view') }}">Zpět</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

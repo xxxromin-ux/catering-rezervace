@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Uživatelé · Catering{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Uživatelé</h1>
+    <div class="subtle">Ruční registrace brigádníků a správa účtů.</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-primary btn-sm" href="{{ url_for('admin_user_new') }}">+ Přidat uživatele</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Uživatel</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Vytvořeno</th>
+            <th class="text-end">Akce</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="fw-semibold">{{ u.username }}</td>
+            <td class="text-secondary">{{ u.email or '—' }}</td>
+            <td><span class="badge {% if u.role=='admin' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ u.role }}</span></td>
+            <td class="text-secondary">{{ u.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="text-end">
+              <form method="post" action="{{ url_for('admin_user_delete', uid=u.id) }}" class="m-0"
+                    onsubmit="return confirm('Opravdu smazat účet {{ u.username }}?');">
+                <button class="btn btn-outline-danger btn-sm" type="submit">Smazat</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if users|length == 0 %}
+          <tr><td colspan="5" class="text-center text-secondary py-4">Žádní uživatelé.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Moje akce · Catering{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Moje akce</h1>
+    <div class="subtle">Akce, na které jsi přihlášen jako brigádník.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Čas</th>
+            <th>Zdroj</th>
+            <th>Akce</th>
+            <th class="text-end">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in items %}
+          <tr>
+            <td class="text-secondary">{{ r.start.strftime('%Y-%m-%d %H:%M') }} – {{ r.end.strftime('%H:%M') }}</td>
+            <td>
+              <span class="d-inline-block rounded-circle border me-2" style="width:12px;height:12px;background:{{ r.resource.color }};"></span>
+              {{ r.resource.name }}
+            </td>
+            <td class="fw-semibold">{{ r.title }}</td>
+            <td class="text-end">
+              <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('detail', rid=r.id) }}">Otevřít</a>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if items|length == 0 %}
+          <tr><td colspan="4" class="text-center text-secondary py-4">Zatím nejsi přihlášen na žádnou akci.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

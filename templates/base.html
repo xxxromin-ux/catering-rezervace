@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="cs" data-bs-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Catering{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  {% block head %}{% endblock %}
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0b57d0;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --ring: rgba(59,130,246,.25);
+    }
+    body{
+      background:
+        radial-gradient(1200px 500px at 10% 0%, rgba(11,87,208,.18), transparent 60%),
+        radial-gradient(900px 450px at 90% 10%, rgba(147,51,234,.14), transparent 55%),
+        #f6f7fb;
+    }
+    .container-xl{ max-width:1200px; }
+    .app-shell{ padding-bottom: 28px; }
+    .card{
+      border-radius: 18px;
+      border: 1px solid rgba(17,24,39,.08);
+      box-shadow: 0 10px 30px rgba(17,24,39,.06);
+    }
+    .navbar{
+      backdrop-filter: saturate(140%) blur(10px);
+      background: rgba(255,255,255,.82) !important;
+    }
+    .navbar-brand{
+      font-weight: 800;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand-dot{
+      width:10px;height:10px;border-radius:50%;
+      background: linear-gradient(135deg, #0b57d0, #9333ea);
+      box-shadow: 0 0 0 6px rgba(11,87,208,.12);
+    }
+    .nav-link{
+      border-radius: 12px;
+      padding: .5rem .75rem;
+    }
+    .nav-link.active, .nav-link:hover{
+      background: rgba(11,87,208,.08);
+    }
+    .btn{
+      border-radius: 12px;
+    }
+    .btn-primary{
+      background: linear-gradient(135deg, #0b57d0, #2563eb);
+      border: none;
+      box-shadow: 0 10px 18px rgba(37,99,235,.18);
+    }
+    .btn-primary:hover{ filter: brightness(.98); }
+    .btn-outline-secondary{ border-color: rgba(17,24,39,.18); }
+    .form-control, .form-select{
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.14);
+      padding: .65rem .8rem;
+    }
+    .form-control:focus, .form-select:focus{
+      box-shadow: 0 0 0 .25rem var(--ring);
+      border-color: rgba(59,130,246,.6);
+    }
+    .badge{
+      border-radius: 999px;
+      padding: .45em .7em;
+    }
+    .soft{
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(17,24,39,.05);
+    }
+    .page-title{
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .subtle{
+      color: var(--muted);
+    }
+    .alert{
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,.08);
+      box-shadow: 0 10px 20px rgba(17,24,39,.05);
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg border-bottom sticky-top">
+  <div class="container-xl">
+    <a class="navbar-brand" href="{{ url_for('calendar_view') }}">
+      <span class="brand-dot"></span> Catering
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto gap-lg-1 mt-2 mt-lg-0">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar_view') }}">Kalendář</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('agenda', mode='today', resource='all') }}">Agenda</a></li>
+
+        {% if current_user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('me') }}">Moje akce</a></li>
+        {% endif %}
+
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('new_reservation') }}">+ Rezervace</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('resources_list') }}">Zdroje</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_signups') }}">Brigádníci</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_users') }}">Uživatelé</a></li>
+        {% endif %}
+      </ul>
+
+      <div class="d-flex gap-2 align-items-center mt-2 mt-lg-0">
+        {% if current_user.is_authenticated %}
+          <span class="subtle small d-none d-lg-inline">
+            {{ current_user.id }} · {{ current_user.role }}
+          </span>
+          <form method="post" action="{{ url_for('logout') }}" class="m-0">
+            <button class="btn btn-outline-secondary btn-sm" type="submit">Odhlásit</button>
+          </form>
+        {% else %}
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('login') }}">Přihlásit</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container-xl app-shell py-3 py-lg-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert {% if cat=='ok' %}alert-success{% else %}alert-danger{% endif %} mb-3">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

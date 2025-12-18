@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Upravit rezervaci · Catering{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Upravit rezervaci</h1>
+    <div class="subtle">ID: {{ r.id }}</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('detail', rid=r.id) }}">Detail</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('calendar_view') }}">Kalendář</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-3 p-lg-4">
+    <form method="post" action="{{ url_for('edit', rid=r.id) }}" class="row g-3">
+      <div class="col-12">
+        <label class="form-label small subtle">Název akce *</label>
+        <input class="form-control" name="title" required value="{{ r.title }}">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Zdroj *</label>
+        <select class="form-select" name="resource_id" required>
+          {% for res in resources %}
+            <option value="{{ res.id }}" {% if r.resource_id == res.id %}selected{% endif %}>
+              {{ res.name }} ({{ res.kind }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Začátek *</label>
+        <input class="form-control" name="start" required type="datetime-local"
+               value="{{ r.start.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label small subtle">Konec *</label>
+        <input class="form-control" name="end" required type="datetime-local"
+               value="{{ r.end.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Zákazník</label>
+        <input class="form-control" name="client" value="{{ r.client or '' }}">
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <label class="form-label small subtle">Kontakt</label>
+        <input class="form-control" name="contact" value="{{ r.contact or '' }}">
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <label class="form-label small subtle">Místo akce</label>
+        <input class="form-control" name="location" value="{{ r.location or '' }}">
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <label class="form-label small subtle">Hosté</label>
+        <input class="form-control" name="guests" type="number" min="0" step="1" value="{{ r.guests if r.guests is not none else '' }}">
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <label class="form-label small subtle">Stav</label>
+        <select class="form-select" name="status">
+          <option value="confirmed" {% if r.status=='confirmed' %}selected{% endif %}>confirmed</option>
+          <option value="tentative" {% if r.status=='tentative' %}selected{% endif %}>tentative</option>
+          <option value="cancelled" {% if r.status=='cancelled' %}selected{% endif %}>cancelled</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label small subtle">Poznámka</label>
+        <textarea class="form-control" name="note" rows="4">{{ r.note or '' }}</textarea>
+      </div>
+
+      <div class="col-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="submit">Uložit změny</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('detail', rid=r.id) }}">Zpět</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Kalendář · Catering{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/fullcalendar@6.1.11/index.global.min.css">
+
+<style>
+  .fc{
+    --fc-border-color: rgba(17,24,39,.12);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255,255,255,.6);
+    --fc-today-bg-color: rgba(11,87,208,.08);
+    --fc-event-border-color: transparent;
+  }
+  .fc .fc-toolbar-title{ font-weight:800; }
+  .fc .fc-button{
+    border-radius: 12px !important;
+    border-color: rgba(17,24,39,.16) !important;
+    background: #fff !important;
+    color: #111827 !important;
+  }
+  .fc .fc-button-primary:not(:disabled).fc-button-active{
+    background: rgba(11,87,208,.10) !important;
+  }
+  .fc .fc-event{ border-radius: 12px; padding: 2px 6px; }
+</style>
+
+<script src="https://unpkg.com/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://unpkg.com/fullcalendar@6.1.11/locales-all.global.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 page-title mb-0">Kalendář obsazenosti</h1>
+    <div class="subtle">Přehled akcí podle zdrojů (tým, auto, kuchyně).</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('agenda', mode='today', resource=selected) }}">Agenda</a>
+    {% if current_user.role == 'admin' %}
+      <a class="btn btn-primary btn-sm" href="{{ url_for('new_reservation') }}">+ Nová rezervace</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="soft p-3 p-lg-3 mb-3 d-flex flex-wrap align-items-center gap-2">
+  <div class="fw-semibold">Filtr zdroje</div>
+  <select id="resourceSel" class="form-select form-select-sm" style="width:auto; min-width:220px">
+    <option value="all" {% if selected == 'all' %}selected{% endif %}>Vše</option>
+    {% for r in resources %}
+      <option value="{{ r.id }}" {% if selected == (r.id|string) %}selected{% endif %}>
+        {{ r.name }} ({{ r.kind }})
+      </option>
+    {% endfor %}
+  </select>
+
+  <div class="ms-auto d-flex gap-2">
+    <a id="printLink" class="btn btn-outline-secondary btn-sm" href="{{ url_for('print_view', mode='today', resource=selected) }}">Tisk dnes</a>
+    <a id="pdfLink" class="btn btn-outline-secondary btn-sm" href="{{ url_for('export_pdf', mode='today', resource=selected) }}">PDF dnes</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div id="calendar"></div>
+    <div id="fcError" class="subtle small mt-2" style="display:none">
+      FullCalendar se nenačetl (síť / blokace CDN). Zkus jinou síť nebo vypnout adblock.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sel = document.getElementById('resourceSel');
+  const resource = sel.value;
+
+  function refreshLinks(v){
+    document.getElementById('printLink').href = `{{ url_for('print_view') }}?mode=today&resource=${v}`;
+    document.getElementById('pdfLink').href   = `{{ url_for('export_pdf') }}?mode=today&resource=${v}`;
+  }
+  refreshLinks(resource);
+
+  sel.addEventListener('change', () => {
+    window.location.href = `{{ url_for('calendar_view') }}?resource=${sel.value}`;
+  });
+
+  if (!window.FullCalendar){
+    document.getElementById('fcError').style.display = 'block';
+    return;
+  }
+
+  const el = document.getElementById('calendar');
+
+  const cal = new FullCalendar.Calendar(el, {
+    locale: 'cs',
+    buttonText: { today: 'Dnes', month: 'Měsíc', week: 'Týden', day: 'Den' },
+    firstDay: 1,
+    nowIndicator: true,
+    height: "auto",
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    events: { url: `/api/reservations?resource=${resource}`, method: 'GET' },
+    eventClick: function(info) {
+      window.location.href = "/reservations/" + info.event.id;
+    }
+  });
+
+  cal.render();
+});
+</script>
+{% endblock %}
