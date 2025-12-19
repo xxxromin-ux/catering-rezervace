@@ -26,8 +26,12 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True, index=True)
-    email = db.Column(db.String(240), nullable=True, index=True)
     role = db.Column(db.String(20), nullable=False, default="reader")  # admin/reader
+
+    # profil brigádníka
+    email = db.Column(db.String(240), nullable=True)
+    full_name = db.Column(db.String(240), nullable=True)
+    phone = db.Column(db.String(80), nullable=True)
 
     salt_b64 = db.Column(db.String(64), nullable=False)
     hash_b64 = db.Column(db.String(128), nullable=False)
@@ -39,12 +43,11 @@ class User(db.Model):
         return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations, dklen=32)
 
     @classmethod
-    def create(cls, username: str, password: str, role: str = "reader", email: str | None = None) -> "User":
+    def create(cls, username: str, password: str, role: str = "reader") -> "User":
         salt = os.urandom(16)
         digest = cls._pbkdf2(password, salt)
         return cls(
             username=username,
-            email=(email.strip() if email else None),
             role=role,
             salt_b64=base64.b64encode(salt).decode("ascii"),
             hash_b64=base64.b64encode(digest).decode("ascii"),
@@ -105,6 +108,10 @@ class ReservationSignup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reservation_id = db.Column(db.Integer, db.ForeignKey("reservations.id"), nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+
+    minutes = db.Column(db.Integer, nullable=False, default=0)
+    note = db.Column(db.Text, nullable=True)
+
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     reservation = db.relationship("Reservation", back_populates="signups")

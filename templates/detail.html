@@ -1,70 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Detail rezervace · Catering{% endblock %}
+{% block title %}Detail rezervace{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
   <div>
-    <h1 class="h4 page-title mb-0">Detail rezervace</h1>
-    <div class="subtle">ID: {{ r.id }}</div>
+    <h3 class="mb-0">Detail rezervace</h3>
+    <div class="text-secondary small">{{ r.resource.name }} · {{ r.start.strftime("%Y-%m-%d %H:%M") }} → {{ r.end.strftime("%H:%M") }}</div>
   </div>
-  <div class="ms-auto d-flex gap-2">
-    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('calendar_view') }}">Kalendář</a>
-    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('agenda', mode='today', resource='all') }}">Agenda</a>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('calendar_view') }}">Zpět</a>
     {% if current_user.role == 'admin' %}
-      <a class="btn btn-primary btn-sm" href="{{ url_for('edit', rid=r.id) }}">Upravit</a>
+      <a class="btn btn-primary" href="{{ url_for('edit', rid=r.id) }}">Upravit</a>
     {% endif %}
   </div>
 </div>
 
 <div class="row g-3">
-  <div class="col-12 col-lg-8">
-    <div class="card">
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm">
       <div class="card-body">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="d-inline-block rounded-circle border" style="width:14px;height:14px;background:{{ r.resource.color }};"></span>
-          <div class="fw-semibold">{{ r.resource.name }} <span class="text-secondary fw-normal">({{ r.resource.kind }})</span></div>
-          <span class="ms-auto badge {% if r.status=='confirmed' %}text-bg-success{% elif r.status=='tentative' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
-            {{ r.status }}
-          </span>
+        <h4 class="mb-2">{{ r.title }}</h4>
+
+        <div class="text-secondary small mb-2">
+          Stav: <b>{{ r.status }}</b>
         </div>
 
-        <h2 class="h5 mb-3">{{ r.title }}</h2>
-
-        <div class="row g-2">
-          <div class="col-12 col-md-6">
-            <div class="subtle small">Začátek</div>
-            <div class="fw-semibold">{{ r.start }}</div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="subtle small">Konec</div>
-            <div class="fw-semibold">{{ r.end }}</div>
-          </div>
+        <div class="row g-2 small">
+          {% if r.client %}<div class="col-12"><b>Zákazník:</b> {{ r.client }}</div>{% endif %}
+          {% if r.contact %}<div class="col-12"><b>Kontakt:</b> {{ r.contact }}</div>{% endif %}
+          {% if r.location %}<div class="col-12"><b>Místo:</b> {{ r.location }}</div>{% endif %}
+          {% if r.guests is not none %}<div class="col-12"><b>Hosté:</b> {{ r.guests }}</div>{% endif %}
+          {% if r.note %}<div class="col-12"><b>Poznámka:</b><br>{{ r.note }}</div>{% endif %}
         </div>
-
-        <hr>
-
-        <div class="row g-2">
-          <div class="col-12 col-md-6"><span class="subtle">Zákazník:</span> {{ r.client or '—' }}</div>
-          <div class="col-12 col-md-6"><span class="subtle">Kontakt:</span> {{ r.contact or '—' }}</div>
-          <div class="col-12 col-md-6"><span class="subtle">Místo:</span> {{ r.location or '—' }}</div>
-          <div class="col-12 col-md-6"><span class="subtle">Hosté:</span> {{ r.guests if r.guests is not none else '—' }}</div>
-        </div>
-
-        {% if r.note %}
-          <hr>
-          <div class="subtle small mb-1">Poznámka</div>
-          <div style="white-space:pre-wrap">{{ r.note }}</div>
-        {% endif %}
 
         {% if current_user.role == 'admin' %}
           <hr>
-          <div class="d-flex flex-wrap gap-2">
+          <div class="d-flex gap-2 flex-wrap">
             <form method="post" action="{{ url_for('cancel', rid=r.id) }}" class="m-0">
-              <button class="btn btn-outline-secondary" type="submit">Zrušit (cancelled)</button>
+              <button class="btn btn-outline-warning btn-sm" type="submit">Zrušit (cancelled)</button>
             </form>
             <form method="post" action="{{ url_for('delete', rid=r.id) }}" class="m-0"
                   onsubmit="return confirm('Opravdu smazat rezervaci?');">
-              <button class="btn btn-outline-danger" type="submit">Smazat</button>
+              <button class="btn btn-outline-danger btn-sm" type="submit">Smazat</button>
             </form>
           </div>
         {% endif %}
@@ -72,41 +49,74 @@
     </div>
   </div>
 
-  <div class="col-12 col-lg-4">
-    <div class="card">
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
       <div class="card-body">
-        <div class="fw-semibold mb-2">Brigádníci</div>
+        <h5 class="mb-3">Brigádníci na akci</h5>
 
-        {% if current_user.role != 'admin' %}
-          {% if is_signed %}
-            <form method="post" action="{{ url_for('unsign', rid=r.id) }}">
-              <button class="btn btn-outline-secondary w-100" type="submit">Odhlásit se z akce</button>
-            </form>
-          {% else %}
-            <form method="post" action="{{ url_for('signup', rid=r.id) }}">
-              <button class="btn btn-primary w-100" type="submit">Přihlásit se na akci</button>
-            </form>
-          {% endif %}
+        {% if current_user.role == 'admin' %}
+          <form method="post" action="{{ url_for('admin_add_signup', rid=r.id) }}" class="d-flex gap-2 flex-wrap mb-3">
+            <select class="form-select form-select-sm" name="user_id" required style="max-width:260px">
+              <option value="">+ Přidat brigádníka…</option>
+              {% set signed_ids = r.signups | map(attribute='user_id') | list %}
+              {% for u in users %}
+                {% if u.id not in signed_ids %}
+                  <option value="{{ u.id }}">{{ u.username }}{% if u.full_name %} — {{ u.full_name }}{% endif %}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <button class="btn btn-outline-primary btn-sm" type="submit">Přidat</button>
+          </form>
         {% else %}
-          <div class="subtle small">Admin zde vidí přihlášené brigádníky.</div>
+          <form method="post" action="{{ url_for('signup_to_reservation', rid=r.id) }}" class="mb-3">
+            <button class="btn btn-outline-primary btn-sm" type="submit">Přihlásit se na akci</button>
+          </form>
         {% endif %}
 
-        <hr>
+        {% if r.signups %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>Uživatel</th>
+                  <th class="text-end">Min</th>
+                  <th class="text-end">Hod</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in r.signups %}
+                <tr>
+                  <td>
+                    <b>{{ s.user.username }}</b>
+                    <div class="text-secondary small">{{ s.user.full_name or '' }}</div>
+                  </td>
 
-        {% if signups|length == 0 %}
-          <div class="text-secondary">Zatím nikdo přihlášen.</div>
+                  {% if current_user.role == 'admin' %}
+                    <td colspan="2">
+                      <form method="post" action="{{ url_for('admin_set_hours', rid=r.id, sid=s.id) }}" class="d-flex gap-2">
+                        <input class="form-control form-control-sm" style="max-width:110px" name="minutes" value="{{ s.minutes or 0 }}" type="number" min="0" step="5">
+                        <input class="form-control form-control-sm" name="note" value="{{ s.note or '' }}" placeholder="poznámka (vol.)">
+                        <button class="btn btn-outline-primary btn-sm" type="submit">Uložit</button>
+                      </form>
+                    </td>
+                    <td class="text-end">
+                      <form method="post" action="{{ url_for('admin_remove_signup', rid=r.id, sid=s.id) }}" class="m-0">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">Odebrat</button>
+                      </form>
+                    </td>
+                  {% else %}
+                    <td class="text-end">{{ s.minutes }}</td>
+                    <td class="text-end">{{ (s.minutes/60)|round(2) }}</td>
+                    <td></td>
+                  {% endif %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <ul class="list-group list-group-flush">
-            {% for s in signups %}
-              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                <div>
-                  <div class="fw-semibold">{{ s.user.username }}</div>
-                  <div class="subtle small">{{ s.user.email or '—' }}</div>
-                </div>
-                <span class="subtle small">{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-              </li>
-            {% endfor %}
-          </ul>
+          <div class="text-secondary">Zatím nikdo není přihlášen.</div>
         {% endif %}
       </div>
     </div>
